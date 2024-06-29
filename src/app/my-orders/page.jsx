@@ -62,7 +62,7 @@ export default function MyOrders() {
                         <TableRow key={order.id}>
                             <TableCell>{order.id}</TableCell>
                             <TableCell>{order.orderNumber}</TableCell>
-                            <TableCell>{order.createdAt}</TableCell>
+                            <TableCell>{new Date(order.createdAt).toISOString().split('T')[0]}</TableCell>
                             <TableCell>{order.numProducts}</TableCell>
                             <TableCell>{order.finalPrice}</TableCell>
                             <TableCell>
