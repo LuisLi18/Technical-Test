@@ -1,9 +1,12 @@
 "use client"
 import { useState } from 'react';
+import Link from 'next/link';
 import { Container, Typography, Table, TableBody, TableCell, TableHead, TableRow, Button, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 
 export default function MyOrders() {
-    // Ejemplo de datos
+
+
+    // This is just a placeholder example
     const initialOrders  = [
         { id: 1, orderNumber: '12345', date: '2024-06-28', numProducts: 3, finalPrice: '$150.00' },
         { id: 2, orderNumber: '67890', date: '2024-06-27', numProducts: 5, finalPrice: '$300.00' },
@@ -13,6 +16,7 @@ export default function MyOrders() {
     const [open, setOpen] = useState(false);
     const [orderToDelete, setOrderToDelete] = useState(null);
 
+    // this 3 functions are for the dialog
     const handleClickOpen = (order) => {
         setOrderToDelete(order);
         setOpen(true);
@@ -24,10 +28,10 @@ export default function MyOrders() {
     };
 
     const handleDelete = () => {
+        // I have to change it to delete the order from the database
         setOrders(orders.filter(order => order.id !== orderToDelete.id));
         handleClose();
     };
-
     return (
         <Container>
             <Typography variant="h4" gutterBottom>
@@ -53,9 +57,11 @@ export default function MyOrders() {
                             <TableCell>{order.numProducts}</TableCell>
                             <TableCell>{order.finalPrice}</TableCell>
                             <TableCell>
-                                <Button variant="contained" color="primary" style={{ marginRight: '8px' }}>
-                                    Edit Order
-                                </Button>
+                                <Link href={`/add-order/${order.id}`} passHref>
+                                    <Button variant="contained" color="primary" sx={{ marginRight: '8px' }}>
+                                        Edit Order
+                                    </Button>
+                                </Link>
                                 <Button variant="contained" color="secondary" onClick={()=>handleClickOpen(order)}>
                                     Delete Order
                                 </Button>
@@ -64,9 +70,11 @@ export default function MyOrders() {
                     ))}
                 </TableBody>
             </Table>
-            <Button variant="contained" color="primary" style={{ marginTop: '16px' }}>
-                Add New Order
-            </Button>
+            <Link href="/add-order" passHref>
+                <Button variant="contained" color="primary" sx={{ marginTop: '16px' }}>
+                    Add New Order
+                </Button>
+            </Link>
 
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Confirm Delete</DialogTitle>
