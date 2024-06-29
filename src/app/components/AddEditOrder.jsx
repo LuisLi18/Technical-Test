@@ -9,7 +9,7 @@ export default function AddEditOrder() {
     const router = useRouter();
     const { id } = useParams();
 
-    // model for the order
+    // model for the order (available products)
     const [order, setOrder] = useState({
         orderNumber: '',
         date: new Date().toISOString().split('T')[0],
@@ -22,24 +22,6 @@ export default function AddEditOrder() {
     const [productToEdit, setProductToEdit] = useState(null);
     const [addOrEditOrder, setAddOrEditOrder] = useState([]);
 
-    // useEffect(() => {
-    //     if (id) {
-    //         // Fetch the order data by id and set it to the state
-    //         // This is just a placeholder example
-    //         const fetchedOrder = {
-    //             orderNumber: '12345',
-    //             date: '2024-06-28',
-    //             numProducts: 3,
-    //             finalPrice: 150,
-    //             products: [
-    //                 { id: 1, name: 'Product 1', unitPrice: 50, qty: 2, totalPrice: 100 },
-    //                 { id: 2, name: 'Product 2', unitPrice: 25, qty: 2, totalPrice: 50 },
-    //                 { id: 3, name: 'Product 3', unitPrice: 100, qty: 2, totalPrice: 200 },
-    //             ],
-    //         };
-    //         setOrder(fetchedOrder);
-    //     }
-    // }, [id]);
     useEffect(() => {
             // Fetch the order data by id and set it to the state
             // This is just a placeholder example

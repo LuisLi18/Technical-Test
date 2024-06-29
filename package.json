@@ -14,7 +14,8 @@
     "@mui/material": "^5.15.21",
     "next": "14.2.4",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "serverless-mysql": "^1.5.5"
   },
   "devDependencies": {
     "eslint": "^8",

@@ -1,22 +1,24 @@
-"use client"
-import { useState } from 'react';
+"use client";
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Container, Typography, Table, TableBody, TableCell, TableHead, TableRow, Button, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 
 export default function MyOrders() {
-
-
-    // This is just a placeholder example
-    const initialOrders  = [
-        { id: 1, orderNumber: '12345', date: '2024-06-28', numProducts: 3, finalPrice: '$150.00' },
-        { id: 2, orderNumber: '67890', date: '2024-06-27', numProducts: 5, finalPrice: '$300.00' },
-    ];
-
-    const [orders, setOrders] = useState(initialOrders);
+    const URL = 'http://localhost:3000/';
+    const [orders, setOrders] = useState([]);
     const [open, setOpen] = useState(false);
     const [orderToDelete, setOrderToDelete] = useState(null);
 
-    // this 3 functions are for the dialog
+    useEffect(() => {
+        const fetchOrders = async () => {
+            const response = await fetch(`${URL}/api/order`);
+            const data = await response.json();
+            setOrders(data);
+        };
+
+        fetchOrders();
+    }, []);
+
     const handleClickOpen = (order) => {
         setOrderToDelete(order);
         setOpen(true);
@@ -27,11 +29,18 @@ export default function MyOrders() {
         setOrderToDelete(null);
     };
 
-    const handleDelete = () => {
-        // I have to change it to delete the order from the database
-        setOrders(orders.filter(order => order.id !== orderToDelete.id));
-        handleClose();
+    const handleDelete = async () => {
+        try {
+            await fetch(`${URL}/api/order/${orderToDelete.id}`, {
+                method: 'DELETE',
+            });
+            setOrders(orders.filter(order => order.id !== orderToDelete.id));
+            handleClose();
+        } catch (error) {
+            console.error('Failed to delete order', error);
+        }
     };
+
     return (
         <Container>
             <Typography variant="h4" gutterBottom>
@@ -53,7 +62,7 @@ export default function MyOrders() {
                         <TableRow key={order.id}>
                             <TableCell>{order.id}</TableCell>
                             <TableCell>{order.orderNumber}</TableCell>
-                            <TableCell>{order.date}</TableCell>
+                            <TableCell>{order.createdAt}</TableCell>
                             <TableCell>{order.numProducts}</TableCell>
                             <TableCell>{order.finalPrice}</TableCell>
                             <TableCell>
@@ -62,7 +71,7 @@ export default function MyOrders() {
                                         Edit Order
                                     </Button>
                                 </Link>
-                                <Button variant="contained" color="secondary" onClick={()=>handleClickOpen(order)}>
+                                <Button variant="contained" color="secondary" onClick={() => handleClickOpen(order)}>
                                     Delete Order
                                 </Button>
                             </TableCell>
