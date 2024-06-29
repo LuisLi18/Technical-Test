@@ -1,12 +1,15 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Container, Typography, TextField, Button, Box, Table, TableBody, TableCell, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Container, Typography, TextField, Button, Box, Table, TableBody, TableCell, 
+    TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid,
+    FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
 export default function AddEditOrder() {
     const router = useRouter();
     const { id } = useParams();
 
+    // model for the order
     const [order, setOrder] = useState({
         orderNumber: '',
         date: new Date().toISOString().split('T')[0],
@@ -17,9 +20,27 @@ export default function AddEditOrder() {
 
     const [open, setOpen] = useState(false);
     const [productToEdit, setProductToEdit] = useState(null);
+    const [addOrEditOrder, setAddOrEditOrder] = useState([]);
 
+    // useEffect(() => {
+    //     if (id) {
+    //         // Fetch the order data by id and set it to the state
+    //         // This is just a placeholder example
+    //         const fetchedOrder = {
+    //             orderNumber: '12345',
+    //             date: '2024-06-28',
+    //             numProducts: 3,
+    //             finalPrice: 150,
+    //             products: [
+    //                 { id: 1, name: 'Product 1', unitPrice: 50, qty: 2, totalPrice: 100 },
+    //                 { id: 2, name: 'Product 2', unitPrice: 25, qty: 2, totalPrice: 50 },
+    //                 { id: 3, name: 'Product 3', unitPrice: 100, qty: 2, totalPrice: 200 },
+    //             ],
+    //         };
+    //         setOrder(fetchedOrder);
+    //     }
+    // }, [id]);
     useEffect(() => {
-        if (id) {
             // Fetch the order data by id and set it to the state
             // This is just a placeholder example
             const fetchedOrder = {
@@ -30,11 +51,12 @@ export default function AddEditOrder() {
                 products: [
                     { id: 1, name: 'Product 1', unitPrice: 50, qty: 2, totalPrice: 100 },
                     { id: 2, name: 'Product 2', unitPrice: 25, qty: 2, totalPrice: 50 },
+                    { id: 3, name: 'Product 3', unitPrice: 100, qty: 2, totalPrice: 200 },
                 ],
             };
             setOrder(fetchedOrder);
-        }
-    }, [id]);
+    }, []);
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -48,10 +70,12 @@ export default function AddEditOrder() {
 
     const handleAddProduct = () => {
         // Logic to add a new product
+        setAddOrEditOrder(['Add Order', 'Add a new product to the order']);
         setOpen(true);
     };
 
     const handleEditProduct = (product) => {
+        setAddOrEditOrder(['Edit Order', 'Edit the product details']);
         setProductToEdit(product);
         setOpen(true);
     };
@@ -79,44 +103,48 @@ export default function AddEditOrder() {
             <Typography variant="h4" gutterBottom>
                 {id ? 'Edit Order' : 'Add Order'}
             </Typography>
-            <Box component="form" noValidate autoComplete="off">
-                <TextField
-                    label="Order Number"
-                    name="orderNumber"
-                    value={order.orderNumber}
-                    onChange={handleInputChange}
-                    fullWidth
-                    margin="normal"
-                />
-                <TextField
-                    label="Date"
-                    name="date"
-                    value={order.date}
-                    onChange={handleInputChange}
-                    fullWidth
-                    margin="normal"
-                    disabled
-                />
-                <TextField
-                    label="Number of Products"
-                    name="numProducts"
-                    value={order.numProducts}
-                    fullWidth
-                    margin="normal"
-                    disabled
-                />
-                <TextField
-                    label="Final Price"
-                    name="finalPrice"
-                    value={order.finalPrice}
-                    fullWidth
-                    margin="normal"
-                    disabled
-                />
-                <Button variant="contained" color="primary" onClick={handleAddProduct} sx={{ marginBottom: '16px' }}>
-                    Add New Product
-                </Button>
-
+            <Grid container spacing={2}>
+                <Grid item xs={12} md={4}>
+                    <Box component="form" noValidate autoComplete="off">
+                        <TextField
+                            label="Order Number"
+                            name="orderNumber"
+                            value={id?order.orderNumber: ''}
+                            onChange={handleInputChange}
+                            fullWidth
+                            margin="normal"
+                        />
+                        <TextField
+                            label="Date"
+                            name="date"
+                            value={new Date().toISOString().split('T')[0]}
+                            onChange={handleInputChange}
+                            fullWidth
+                            margin="normal"
+                            disabled
+                        />
+                        <TextField
+                            label="Number of Products"
+                            name="numProducts"
+                            value={id?order.numProducts: 0}
+                            fullWidth
+                            margin="normal"
+                            disabled
+                        />
+                        <TextField
+                            label="Final Price"
+                            name="finalPrice"
+                            value={id?order.finalPrice: 0}
+                            fullWidth
+                            margin="normal"
+                            disabled
+                        />
+                        <Button variant="contained" color="primary" onClick={handleAddProduct} sx={{ marginBottom: '16px' }}>
+                            Add New Product
+                        </Button>
+                    </Box>
+                </Grid>
+                <Grid item xs={12} md={8}>
                 <Table>
                     <TableHead>
                         <TableRow>
@@ -148,42 +176,68 @@ export default function AddEditOrder() {
                         ))}
                     </TableBody>
                 </Table>
+                </Grid>
+            </Grid>
+                <h1>Available Products</h1>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>ID</TableCell>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Unit Price</TableCell>
+                            <TableCell>Qty</TableCell>
+                            <TableCell>Total Price</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {order.products.map((product) => (
+                            <TableRow key={product.id}>
+                                <TableCell>{product.id}</TableCell>
+                                <TableCell>{product.name}</TableCell>
+                                <TableCell>{product.unitPrice}</TableCell>
+                                <TableCell>{product.qty}</TableCell>
+                                <TableCell>{product.totalPrice}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
 
                 <Button variant="contained" color="primary" onClick={handleSave} sx={{ marginTop: '16px' }}>
-                    Save Order
+                    {id?'Save': 'Add'} Order
                 </Button>
-            </Box>
+            
 
             <Dialog open={open} onClose={handleProductDialogClose}>
-                <DialogTitle>{productToEdit ? 'Edit Product' : 'Add Product'}</DialogTitle>
+                <DialogTitle>{addOrEditOrder[0]}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        {productToEdit ? 'Edit the product details' : 'Add a new product to the order'}
+                        {addOrEditOrder[1]}
                     </DialogContentText>
-                    <TextField
-                        label="Product Name"
-                        name="name"
-                        value={productToEdit ? productToEdit.name : ''}
-                        onChange={(e) => setProductToEdit({ ...productToEdit, name: e.target.value })}
-                        fullWidth
-                        margin="normal"
-                    />
-                    <TextField
-                        label="Unit Price"
-                        name="unitPrice"
-                        value={productToEdit ? productToEdit.unitPrice : ''}
-                        onChange={(e) => setProductToEdit({ ...productToEdit, unitPrice: e.target.value })}
-                        fullWidth
-                        margin="normal"
-                    />
-                    <TextField
-                        label="Quantity"
-                        name="qty"
-                        value={productToEdit ? productToEdit.qty : ''}
-                        onChange={(e) => setProductToEdit({ ...productToEdit, qty: e.target.value })}
-                        fullWidth
-                        margin="normal"
-                    />
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel id="product-select-label">Product</InputLabel>
+                        <Select
+                            labelId="product-select-label"
+                            id="product-select"
+                            value={productToEdit ? productToEdit.name : ''}
+                            label="Product"
+                            onChange={(e) => setProductToEdit({ ...productToEdit, name: e.target.value })}
+                        >
+                            {order.products.map((product) => (
+                                <MenuItem key={product.id} value={product.name}>
+                                    {product.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                        <TextField
+                            label="Quantity"
+                            name="qty"
+                            value={productToEdit ? productToEdit.qty : ''}
+                            onChange={(e) => setProductToEdit({ ...productToEdit, qty: e.target.value })}
+                            fullWidth
+                            margin="normal"
+                        />
+                    </FormControl>
+                    
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleProductDialogClose} color="primary">
