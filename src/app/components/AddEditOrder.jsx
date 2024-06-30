@@ -1,9 +1,11 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Container, Typography, TextField, Button, Box, Table, TableBody, TableCell, 
-    TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid,
-    FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Container, Typography, Grid, Box, Table, TableBody, TableCell, TableHead, TableRow, Button } from '@mui/material';
+import OrderForm from './OrderForm';
+import ProductTable from './ProductTable';
+import ProductDialog from './ProductDialog';
+import ConfirmationDialog from './ConfimationDialog';
 
 export default function AddEditOrder() {
     const URL = 'http://localhost:3000';
@@ -32,21 +34,20 @@ export default function AddEditOrder() {
     const [deleteProduct, setDeleteProduct] = useState(null);
 
     useEffect(() => {
-        // Fetch the order data by id and set it to the state
-        // This is just a placeholder example
-        const fetchedOrder = {
-            orderNumber: '12345',
-            date: '2024-06-28',
-            numProducts: 3,
-            finalPrice: 150,
-            products: [
-                { id: 1, name: 'Product 1', unitPrice: 50, qty: 2, totalPrice: 100 },
-                { id: 2, name: 'Product 2', unitPrice: 25, qty: 2, totalPrice: 50 },
-                { id: 3, name: 'Product 3', unitPrice: 100, qty: 2, totalPrice: 200 },
-            ],
+        const fetchOrder = async () => {
+            if (id) {
+                try {
+                    const res = await fetch(`${URL}/api/orders/${id}`);
+                    const data = await res.json();
+                    setOrder(data);
+                    setNewOrder(data);
+                } catch (error) {
+                    console.error('Failed to fetch order', error);
+                }
+            }
         };
-        setOrder(fetchedOrder);
-    }, []);
+        fetchOrder();
+    }, [id]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -55,8 +56,8 @@ export default function AddEditOrder() {
 
     const handleSave = async () => {
         try {
-            const res = await fetch(`${URL}/api/order`, {
-                method: 'POST',
+            const res = await fetch(`${URL}/api/orders${id ? `/${id}` : ''}`, {
+                method: id ? 'PUT' : 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -65,7 +66,7 @@ export default function AddEditOrder() {
             const data = await res.json();
             // Post products associated with the new order
             await Promise.all(newOrder.products.map(async (product) => {
-                await fetch(`${URL}/api/order/${data.id}/product`, {
+                await fetch(`${URL}/api/orders/${data.id}/products`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -97,9 +98,11 @@ export default function AddEditOrder() {
             products: newOrder.products.filter(product => product.id !== deleteProduct),
         });
     };
+
     const handleClose = () => {
         setOpenConfirmation(false);
     };
+
     const handleOpen = (productId) => {
         setDeleteProduct(productId);
         setOpenConfirmation(true);
@@ -111,31 +114,26 @@ export default function AddEditOrder() {
     };
 
     const handleProductDialogSave = (product) => {
-        console.log(productToEdit);
-        
-        setNewOrder({
-            ...newOrder,
-            products: order.products.map(({name, unitPrice, qty, totalPrice}) => ({
-                name: name,
-                unitPrice: unitPrice,
-                qty: productToEdit.qty,
-                totalPrice: unitPrice * productToEdit.qty
-            }))
-                .filter(p => p.name === productToEdit.name)
-        });
-        setOrder({
-            ...order,
-            products: order.products.map(({name, unitPrice, qty, totalPrice}) => ({
-                name: name,
-                unitPrice: unitPrice,
-                qty: name===productToEdit.name?(qty - productToEdit.qty): qty,
-                totalPrice: name===productToEdit.name?(unitPrice * (qty - productToEdit.qty)): totalPrice,
-            }))
-        });
-        
+        if (productToEdit) {
+            // Update existing product
+            setNewOrder({
+                ...newOrder,
+                products: newOrder.products.map(p => p.id === productToEdit.id ? productToEdit : p)
+            });
+        } else {
+            // Add new product
+            setNewOrder({
+                ...newOrder,
+                products: [...newOrder.products, { ...product, id: newOrder.products.length + 1 }]
+            });
+        }
         handleProductDialogClose();
     };
-    
+
+    const handleProductToEditChange = (e) => {
+        const { name, value } = e.target;
+        setProductToEdit({ ...productToEdit, [name]: value });
+    };
 
     return (
         <Container>
@@ -144,75 +142,18 @@ export default function AddEditOrder() {
             </Typography>
             <Grid container spacing={2}>
                 <Grid item xs={12} md={4}>
-                    <Box component="form" noValidate autoComplete="off">
-                        <TextField
-                            label="Order Number"
-                            name="orderNumber"
-                            value={newOrder.orderNumber}
-                            onChange={handleInputChange}
-                            fullWidth
-                            margin="normal"
-                        />
-                        <TextField
-                            label="Date"
-                            name="date"
-                            value={newOrder.date}
-                            onChange={handleInputChange}
-                            fullWidth
-                            margin="normal"
-                            disabled
-                        />
-                        <TextField
-                            label="Number of Products"
-                            name="numProducts"
-                            value={newOrder.products.length}
-                            fullWidth
-                            margin="normal"
-                            disabled
-                        />
-                        <TextField
-                            label="Final Price"
-                            name="finalPrice"
-                            value={newOrder.products.reduce((total, product) => total + product.totalPrice, 0)}
-                            fullWidth
-                            margin="normal"
-                            disabled
-                        />
-                        <Button variant="contained" color="primary" onClick={handleAddProduct} sx={{ marginBottom: '16px' }}>
-                            Add New Product
-                        </Button>
-                    </Box>
+                    <OrderForm
+                        order={newOrder}
+                        handleInputChange={handleInputChange}
+                        handleAddProduct={handleAddProduct}
+                    />
                 </Grid>
                 <Grid item xs={12} md={8}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Unit Price</TableCell>
-                                <TableCell>Qty</TableCell>
-                                <TableCell>Total Price</TableCell>
-                                <TableCell>Options</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {newOrder.products.map((product) => (
-                                <TableRow key={product.id}>
-                                    <TableCell>{product.name}</TableCell>
-                                    <TableCell>{product.unitPrice}</TableCell>
-                                    <TableCell>{product.qty}</TableCell>
-                                    <TableCell>{product.totalPrice}</TableCell>
-                                    <TableCell>
-                                        <Button variant="contained" color="primary" onClick={() => handleEditProduct(product)} sx={{ marginRight: '8px' }}>
-                                            Edit
-                                        </Button>
-                                        <Button variant="contained" color="secondary" onClick={() => handleOpen(product.id)}>
-                                            Delete
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                    <ProductTable
+                        products={newOrder.products}
+                        handleEditProduct={handleEditProduct}
+                        handleOpen={handleOpen}
+                    />
                 </Grid>
             </Grid>
             <h1>Available Products</h1>
@@ -239,63 +180,21 @@ export default function AddEditOrder() {
                 {id ? 'Save' : 'Add'} Order
             </Button>
 
-            <Dialog open={open} onClose={handleProductDialogClose}>
-                <DialogTitle>{addOrEditOrder[0]}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        {addOrEditOrder[1]}
-                    </DialogContentText>
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel id="product-select-label">Product</InputLabel>
-                        <Select
-                            labelId="product-select-label"
-                            id="product-select"
-                            value={productToEdit ? productToEdit.name : ''}
-                            label="Product"
-                            onChange={(e) => setProductToEdit({ ...productToEdit, name: e.target.value })}
-                        >
-                            {order.products.map((product) => (
-                                <MenuItem key={product.id} value={product.name}>
-                                    {product.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                        <TextField
-                            label="Quantity"
-                            name="qty"
-                            value={productToEdit ? productToEdit.qty : ''}
-                            onChange={(e) => setProductToEdit({ ...productToEdit, qty: e.target.value })}
-                            fullWidth
-                            margin="normal"
-                        />
-                    </FormControl>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleProductDialogClose} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={() => handleProductDialogSave(productToEdit)} color="primary">
-                        Save
-                    </Button>
-                </DialogActions>
-            </Dialog>
-            
-            <Dialog open={openConfirmation} onClose={handleClose}>
-                <DialogTitle>Confirm Delete</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Are you sure you want to delete this product?
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleDeleteProduct} color="secondary">
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <ProductDialog
+                open={open}
+                addOrEditOrder={addOrEditOrder}
+                productToEdit={productToEdit}
+                orderProducts={order.products}
+                handleProductDialogClose={handleProductDialogClose}
+                handleProductDialogSave={handleProductDialogSave}
+                handleProductToEditChange={handleProductToEditChange}
+            />
+
+            <ConfirmationDialog
+                openConfirmation={openConfirmation}
+                handleClose={handleClose}
+                handleDeleteProduct={handleDeleteProduct}
+            />
         </Container>
     );
 }
