@@ -112,7 +112,7 @@ export default function AddEditOrder() {
 
     const handleProductDialogSave = (product) => {
         console.log(productToEdit);
-            // Update existing product
+        
         setNewOrder({
             ...newOrder,
             products: order.products.map(({name, unitPrice, qty, totalPrice}) => ({

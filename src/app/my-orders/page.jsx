@@ -11,7 +11,7 @@ export default function MyOrders() {
 
     useEffect(() => {
         const fetchOrders = async () => {
-            const response = await fetch(`${URL}/api/order`);
+            const response = await fetch(`${URL}/api/orders`);
             const data = await response.json();
             setOrders(data);
         };
@@ -31,7 +31,7 @@ export default function MyOrders() {
 
     const handleDelete = async () => {
         try {
-            await fetch(`${URL}/api/order/${orderToDelete.id}`, {
+            await fetch(`${URL}/api/orders/${orderToDelete.id}`, {
                 method: 'DELETE',
             });
             setOrders(orders.filter(order => order.id !== orderToDelete.id));
