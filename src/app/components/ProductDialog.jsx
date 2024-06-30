@@ -1,6 +1,8 @@
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, Select, MenuItem, TextField, Button } from '@mui/material';
 
-export default function ProductDialog({ open, addOrEditOrder, productToEdit, orderProducts, handleProductDialogClose, handleProductDialogSave, handleProductToEditChange }) {
+export default function ProductDialog({ open, addOrEditOrder, productToAdd, availableProducts, handleProductDialogClose, handleProductDialogSave, handleProductToAddChange }) {
+    const isEditMode = addOrEditOrder[0]?.toLowerCase().includes('edit');
+
     return (
         <Dialog open={open} onClose={handleProductDialogClose}>
             <DialogTitle>{addOrEditOrder[0]}</DialogTitle>
@@ -13,11 +15,13 @@ export default function ProductDialog({ open, addOrEditOrder, productToEdit, ord
                     <Select
                         labelId="product-select-label"
                         id="product-select"
-                        value={productToEdit ? productToEdit.name : ''}
+                        name="product"
+                        value={productToAdd ? productToAdd.product : ''}
                         label="Product"
-                        onChange={handleProductToEditChange}
+                        onChange={handleProductToAddChange}
+                        disabled={isEditMode}
                     >
-                        {orderProducts.map((product) => (
+                        {availableProducts && availableProducts.map((product) => (
                             <MenuItem key={product.id} value={product.name}>
                                 {product.name}
                             </MenuItem>
@@ -26,8 +30,8 @@ export default function ProductDialog({ open, addOrEditOrder, productToEdit, ord
                     <TextField
                         label="Quantity"
                         name="qty"
-                        value={productToEdit ? productToEdit.qty : ''}
-                        onChange={(e) => handleProductToEditChange(e)}
+                        value={productToAdd ? productToAdd.qty : ''}
+                        onChange={(e) => handleProductToAddChange(e)}
                         fullWidth
                         margin="normal"
                     />
@@ -37,8 +41,8 @@ export default function ProductDialog({ open, addOrEditOrder, productToEdit, ord
                 <Button onClick={handleProductDialogClose} color="primary">
                     Cancel
                 </Button>
-                <Button onClick={() => handleProductDialogSave(productToEdit)} color="primary">
-                    Save
+                <Button onClick={() => handleProductDialogSave(productToAdd.product, productToAdd.qty, addOrEditOrder[0]?.split(' ')[0]?.toLowerCase() || '')} color="primary">
+                    {addOrEditOrder[0] ? addOrEditOrder[0].split(' ')[0] : ''}
                 </Button>
             </DialogActions>
         </Dialog>

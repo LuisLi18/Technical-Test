@@ -13,7 +13,7 @@ export default function ProductTable({ products, handleEditProduct, handleOpen }
                 </TableRow>
             </TableHead>
             <TableBody>
-                {products.map((product) => (
+                {products && products.map((product) => (
                     <TableRow key={product.id}>
                         <TableCell>{product.name}</TableCell>
                         <TableCell>{product.unitPrice}</TableCell>

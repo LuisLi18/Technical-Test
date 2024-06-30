@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Container, Typography, Grid, Box, Table, TableBody, TableCell, TableHead, TableRow, Button } from '@mui/material';
+import { Container, Typography, Grid, Box, Table, TableBody, TableCell, TableHead, TableRow, Button, Snackbar } from '@mui/material';
 import OrderForm from './OrderForm';
 import ProductTable from './ProductTable';
 import ProductDialog from './ProductDialog';
@@ -26,11 +26,22 @@ export default function AddEditOrder() {
         finalPrice: 0,
         products: [],
     });
+    // show the available products
+    const [availableProducts, setAvailableProducts] = useState([]);
 
+    // list of product to add to the order
+    const [productList, setProductList] = useState([]);
+
+    // open dialogs
     const [open, setOpen] = useState(false);
     const [openConfirmation, setOpenConfirmation] = useState(false);
-    const [productToEdit, setProductToEdit] = useState(null);
+    // product that user wants to add in Product Dialog
+    const [productToAdd, setproductToAdd] = useState(null);
+
+    // add or edit order in Product Dialog (it's only a tag)
     const [addOrEditOrder, setAddOrEditOrder] = useState([]);
+
+    // product to delete in Confirmation Dialog (is an id)
     const [deleteProduct, setDeleteProduct] = useState(null);
 
     useEffect(() => {
@@ -48,6 +59,19 @@ export default function AddEditOrder() {
         };
         fetchOrder();
     }, [id]);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const res = await fetch(`${URL}/api/products`);
+                const data = await res.json();
+                setAvailableProducts(data);
+            } catch (error) {
+                console.error('Failed to fetch products', error);
+            }
+        };
+        fetchProducts();
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -87,16 +111,20 @@ export default function AddEditOrder() {
 
     const handleEditProduct = (product) => {
         setAddOrEditOrder(['Edit Product', 'Edit the product details']);
-        setProductToEdit(product);
+        setproductToAdd(product);
         setOpen(true);
     };
 
     const handleDeleteProduct = () => {
         handleClose();
-        setNewOrder({
-            ...newOrder,
-            products: newOrder.products.filter(product => product.id !== deleteProduct),
-        });
+        // Aumentar el stock del producto eliminado
+        const productToDelete = productList.find(p => p.id === deleteProduct);
+        const product = availableProducts.find(p => p.id === deleteProduct);
+
+        product.stock += productToDelete.qty;
+
+        // Eliminar el producto de la lista
+        setProductList(prevList => prevList.filter(product => product.id !== deleteProduct));
     };
 
     const handleClose = () => {
@@ -110,29 +138,80 @@ export default function AddEditOrder() {
 
     const handleProductDialogClose = () => {
         setOpen(false);
-        setProductToEdit(null);
+        setproductToAdd(null);
     };
 
-    const handleProductDialogSave = (product) => {
-        if (productToEdit) {
-            // Update existing product
-            setNewOrder({
-                ...newOrder,
-                products: newOrder.products.map(p => p.id === productToEdit.id ? productToEdit : p)
-            });
+    const handleProductDialogSave = (productName, quantity, actionToAddOrEdit) => {
+        quantity = parseInt(quantity);
+        // Encontrar el producto en availableProducts
+        const product = availableProducts.find(p => p.name === productName);
+
+        if (!product) {
+            console.alert('Product not found in available products.');
+            return;
+        }
+
+        // Verificar si hay suficiente stock
+        if (product.stock < quantity) {
+            console.alert('Not enough stock available.');
+            return;
+        }
+
+        // Encontrar si el producto ya está en la lista de productos
+        const existingProduct = productList.find(p => p.name === productName);
+
+        if (existingProduct) {
+            // Si el producto ya existe, sumar la cantidad
+            const newQty = existingProduct.qty + quantity;
+            
+            // Verificar si hay suficiente stock
+            if (product.stock < newQty - existingProduct.qty) {
+                console.alert('Not enough stock available for additional quantity.');
+                return;
+            }
+            // Condicional para editar la cantidad de productos
+            if (actionToAddOrEdit == 'add'){
+                existingProduct.qty += quantity;
+            }
+            else{
+                console.log('Existing product:', existingProduct.qty)
+                console.log('Quantity:', quantity)
+                if (existingProduct.qty > quantity){
+                    product.stock += (existingProduct.qty - quantity);
+                }
+                else{
+                    product.stock -= (quantity - existingProduct.qty);
+                }
+                existingProduct.qty = quantity;
+            }
+
+            existingProduct.totalPrice = existingProduct.unitPrice * existingProduct.qty;
         } else {
-            // Add new product
-            setNewOrder({
-                ...newOrder,
-                products: [...newOrder.products, { ...product, id: newOrder.products.length + 1 }]
+            // Si el producto es nuevo, añadirlo a la lista
+            productList.push({
+                id: product.id,
+                name: product.name,
+                unitPrice: product.unitPrice,
+                qty: quantity,
+                totalPrice: product.unitPrice * quantity
             });
         }
+
+        // Restar la cantidad del stock de availableProducts
+        // Considerar una condicional para restar o sumar el stock
+        if (actionToAddOrEdit == 'add') {
+            product.stock -= quantity;
+        }
+
+        console.log('Product added to list:', productList);
+        console.log('Updated available products:', availableProducts);
+
         handleProductDialogClose();
     };
 
-    const handleProductToEditChange = (e) => {
+    const handleProductToAddChange = (e) => {
         const { name, value } = e.target;
-        setProductToEdit({ ...productToEdit, [name]: value });
+        setproductToAdd({ ...productToAdd, [name]: value });
     };
 
     return (
@@ -150,7 +229,7 @@ export default function AddEditOrder() {
                 </Grid>
                 <Grid item xs={12} md={8}>
                     <ProductTable
-                        products={newOrder.products}
+                        products={productList}
                         handleEditProduct={handleEditProduct}
                         handleOpen={handleOpen}
                     />
@@ -166,11 +245,11 @@ export default function AddEditOrder() {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {order.products.map((product) => (
+                    {availableProducts && availableProducts.map((product) => (
                         <TableRow key={product.id}>
                             <TableCell>{product.name}</TableCell>
                             <TableCell>{product.unitPrice}</TableCell>
-                            <TableCell>{product.qty}</TableCell>
+                            <TableCell>{product.stock}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
@@ -183,11 +262,11 @@ export default function AddEditOrder() {
             <ProductDialog
                 open={open}
                 addOrEditOrder={addOrEditOrder}
-                productToEdit={productToEdit}
-                orderProducts={order.products}
+                productToAdd={productToAdd}
+                availableProducts={availableProducts}
                 handleProductDialogClose={handleProductDialogClose}
                 handleProductDialogSave={handleProductDialogSave}
-                handleProductToEditChange={handleProductToEditChange}
+                handleProductToAddChange={handleProductToAddChange}
             />
 
             <ConfirmationDialog
