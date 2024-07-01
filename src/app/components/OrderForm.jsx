@@ -13,6 +13,7 @@ export default function OrderForm({ order, handleInputChange, handleAddProduct }
                 onChange={handleInputChange}
                 fullWidth
                 margin="normal"
+                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
             />
             <TextField
                 label="Date"

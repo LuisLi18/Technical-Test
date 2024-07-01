@@ -18,7 +18,7 @@ export async function POST(request) {
         console.log('orderId', orderId);
         console.log('products', products)
         for (const product of products) {
-            await connection.query('INSERT INTO technical.orderdetail (orderId, productId, quantity, totalPrice) VALUES (?, ?, ?, ?)', [orderId, product.id, product.quantity, product.totalPrice]);
+            await connection.query('INSERT INTO technical.orderdetail (orderId, productId, quantity, totalPrice) VALUES (?, ?, ?, ?)', [orderId, product.id, product.qty, product.totalPrice]);
         }
         return NextResponse.json({ id: orderId, orderNumber, numProducts, finalPrice });
     } catch (error) {

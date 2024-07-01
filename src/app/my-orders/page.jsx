@@ -41,6 +41,10 @@ export default function MyOrders() {
         }
     };
 
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+    };
+
     return (
         <Container>
             <Typography variant="h4" gutterBottom>
@@ -50,9 +54,9 @@ export default function MyOrders() {
                 <TableHead>
                     <TableRow>
                         <TableCell>ID</TableCell>
-                        <TableCell>Order Number</TableCell>
+                        <TableCell># Order</TableCell>
                         <TableCell>Date</TableCell>
-                        <TableCell>Number of Products</TableCell>
+                        <TableCell># Products</TableCell>
                         <TableCell>Final Price</TableCell>
                         <TableCell>Options</TableCell>
                     </TableRow>
@@ -64,7 +68,7 @@ export default function MyOrders() {
                             <TableCell>{order.orderNumber}</TableCell>
                             <TableCell>{new Date(order.createdAt).toISOString().split('T')[0]}</TableCell>
                             <TableCell>{order.numProducts}</TableCell>
-                            <TableCell>{order.finalPrice}</TableCell>
+                            <TableCell>{formatCurrency(order.finalPrice)}</TableCell>
                             <TableCell>
                                 <Link href={`/add-order/${order.id}`} passHref>
                                     <Button variant="contained" color="primary" sx={{ marginRight: '8px' }}>

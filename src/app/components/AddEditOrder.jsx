@@ -12,19 +12,11 @@ export default function AddEditOrder() {
     const router = useRouter();
     const { id } = useParams();
 
-    const [order, setOrder] = useState({
-        orderNumber: '',
-        date: new Date().toISOString().split('T')[0],
-        numProducts: 0,
-        finalPrice: 0,
-        products: [],
-    });
     const [newOrder, setNewOrder] = useState({
         orderNumber: '',
         date: new Date().toISOString().split('T')[0],
         numProducts: 0,
         finalPrice: 0,
-        products: [],
     });
     // show the available products
     const [availableProducts, setAvailableProducts] = useState([]);
@@ -48,10 +40,23 @@ export default function AddEditOrder() {
         const fetchOrder = async () => {
             if (id) {
                 try {
-                    const res = await fetch(`${URL}/api/orders/${id}`);
+                    // actualiza la información del pedido
+                    const orderRes = await fetch(`${URL}/api/orders/${id}`);
+                    const orderData = await orderRes.json();
+                    // Transformar la respuesta para ajustar el estado `newOrder`
+                    const transformedOrder = {
+                        orderNumber: orderData.orderNumber,
+                        date: orderData.createdAt.split('T')[0],
+                        numProducts: orderData.numProducts,
+                        finalPrice: orderData.finalPrice,
+                    };
+
+                    setNewOrder(transformedOrder);
+
+                    // actualiza la lista de productos del pedido
+                    const res = await fetch(`${URL}/api/orders/${id}/products`);
                     const data = await res.json();
-                    setOrder(data);
-                    setNewOrder(data);
+                    setProductList(data);
                 } catch (error) {
                     console.error('Failed to fetch order', error);
                 }
@@ -63,6 +68,7 @@ export default function AddEditOrder() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
+                // actualiza la lista de productos disponibles
                 const res = await fetch(`${URL}/api/products`);
                 const data = await res.json();
                 setAvailableProducts(data);
@@ -82,14 +88,15 @@ export default function AddEditOrder() {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setNewOrder({ ...newOrder, 
-            [name]: value,
-        });
         updateOrder();
+        setNewOrder({ ...newOrder, [name]: value, });
     };
 
     const handleSave = async () => {
         try {
+            newOrder.products = productList;
+            // console.newOrder('new Order', newOrder);
+            // Save or Update the order
             const res = await fetch(`${URL}/api/orders${id ? `/${id}` : ''}`, {
                 method: id ? 'PUT' : 'POST',
                 headers: {
@@ -98,16 +105,20 @@ export default function AddEditOrder() {
                 body: JSON.stringify(newOrder)
             });
             const data = await res.json();
-            // Post products associated with the new order
-            await Promise.all(newOrder.products.map(async (product) => {
-                await fetch(`${URL}/api/orders/${data.id}/products`, {
-                    method: 'POST',
+            console.log('Saved order:', data);
+
+            // Update the stock of the products
+            await Promise.all(availableProducts.map(async (product) => {
+                console.log("PRODUCT", product);
+                await fetch(`${URL}/api/products/${product.id}`, {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(product)
                 });
             }));
+            console.log('Updated products:', availableProducts);
             router.push('/my-orders');
         } catch (error) {
             console.error('Failed to save order', error);
@@ -243,11 +254,14 @@ export default function AddEditOrder() {
                     />
                 </Grid>
                 <Grid item xs={12} md={8}>
-                    <ProductTable
-                        products={productList}
-                        handleEditProduct={handleEditProduct}
-                        handleOpen={handleOpen}
-                    />
+                    {
+                        productList.length > 0 ? (
+                        <ProductTable
+                            products={productList}
+                            handleEditProduct={handleEditProduct}
+                            handleOpen={handleOpen}
+                        />) : <p>Try adding products in your order</p> 
+                    }
                 </Grid>
             </Grid>
             <h1>Available Products</h1>

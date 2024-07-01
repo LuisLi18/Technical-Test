@@ -2,7 +2,6 @@ import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, F
 
 export default function ProductDialog({ open, addOrEditOrder, productToAdd, availableProducts, handleProductDialogClose, handleProductDialogSave, handleProductToAddChange }) {
     const isEditMode = addOrEditOrder[0]?.toLowerCase().includes('edit');
-    console.log(productToAdd);
     return (
         <Dialog open={open} onClose={handleProductDialogClose}>
             <DialogTitle>{addOrEditOrder[0]}</DialogTitle>
