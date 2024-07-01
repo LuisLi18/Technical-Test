@@ -73,9 +73,19 @@ export default function AddEditOrder() {
         fetchProducts();
     }, []);
 
+    const updateOrder = () => {
+        setNewOrder({ ...newOrder, 
+            numProducts: productList.length,
+            finalPrice: productList.reduce((total, product) => total + product.totalPrice, 0)
+        });
+    }
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setNewOrder({ ...newOrder, [name]: value });
+        setNewOrder({ ...newOrder, 
+            [name]: value,
+        });
+        updateOrder();
     };
 
     const handleSave = async () => {
@@ -203,6 +213,7 @@ export default function AddEditOrder() {
             product.stock -= quantity;
         }
 
+        updateOrder();
         console.log('Product added to list:', productList);
         console.log('Updated available products:', availableProducts);
 

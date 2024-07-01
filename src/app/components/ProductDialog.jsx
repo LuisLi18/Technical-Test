@@ -19,7 +19,7 @@ export default function ProductDialog({ open, addOrEditOrder, productToAdd, avai
                         value={productToAdd ? productToAdd.product : ''}
                         label="Product"
                         onChange={handleProductToAddChange}
-                        disabled={isEditMode}
+                        // disabled={isEditMode}
                     >
                         {availableProducts && availableProducts.map((product) => (
                             <MenuItem key={product.id} value={product.name}>

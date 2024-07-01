@@ -23,7 +23,7 @@ export default function OrderForm({ order, handleInputChange, handleAddProduct }
             <TextField
                 label="Number of Products"
                 name="numProducts"
-                value={order.products?order.products.length: ''}
+                value={order.numProducts}
                 fullWidth
                 margin="normal"
                 disabled
@@ -31,7 +31,7 @@ export default function OrderForm({ order, handleInputChange, handleAddProduct }
             <TextField
                 label="Final Price"
                 name="finalPrice"
-                value={order.products?order.products.reduce((total, product) => total + product.totalPrice, 0): ''	}
+                value={order.finalPrice}
                 fullWidth
                 margin="normal"
                 disabled
