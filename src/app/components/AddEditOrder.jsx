@@ -225,6 +225,10 @@ export default function AddEditOrder() {
         setproductToAdd({ ...productToAdd, [name]: value });
     };
 
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+    };
+
     return (
         <Container>
             <Typography variant="h4" gutterBottom>
@@ -253,16 +257,29 @@ export default function AddEditOrder() {
                         <TableCell>Name</TableCell>
                         <TableCell>Unit Price</TableCell>
                         <TableCell>Stock</TableCell>
+                        <TableCell>Stock Used</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {availableProducts && availableProducts.map((product) => (
-                        <TableRow key={product.id}>
-                            <TableCell>{product.name}</TableCell>
-                            <TableCell>{product.unitPrice}</TableCell>
-                            <TableCell>{product.stock}</TableCell>
-                        </TableRow>
-                    ))}
+                    {availableProducts && availableProducts.map((product) => {
+                            const usedStock = productList.find(p => p.id === product.id)?.qty || 0;
+                            return (
+                                <TableRow key={product.id}>
+                                    <TableCell>{product.name}</TableCell>
+                                    <TableCell>{formatCurrency(product.unitPrice)}</TableCell>
+                                    <TableCell>{product.stock}</TableCell>
+                                    <TableCell>
+                                        {usedStock > 0 ? (
+                                            <span style={{ color: 'red' }}>
+                                                {usedStock} <span style={{ fontSize: 'small' }}>↓</span>
+                                            </span>
+                                        ) : (
+                                            <span>{usedStock}</span>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
                 </TableBody>
             </Table>
 

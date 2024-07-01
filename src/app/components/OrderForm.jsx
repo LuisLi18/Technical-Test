@@ -1,6 +1,9 @@
 import { Box, TextField, Button } from '@mui/material';
 
 export default function OrderForm({ order, handleInputChange, handleAddProduct }) {
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+    };
     return (
         <Box component="form" noValidate autoComplete="off">
             <TextField
@@ -31,7 +34,7 @@ export default function OrderForm({ order, handleInputChange, handleAddProduct }
             <TextField
                 label="Final Price"
                 name="finalPrice"
-                value={order.finalPrice}
+                value={formatCurrency(order.finalPrice)}
                 fullWidth
                 margin="normal"
                 disabled
