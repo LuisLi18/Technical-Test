@@ -52,7 +52,7 @@ export default function MyOrders() {
     return (
         <Container className={styles.container}>
             <div className={styles.header}>
-                <Typography variant="h4" gutterBottom>
+                <Typography variant="h4" gutterBottom style={{fontWeight: 'bold'}}>
                     My Orders
                 </Typography>
                 <Link href="/add-order" passHref>
@@ -64,12 +64,12 @@ export default function MyOrders() {
             <Table className={styles.table}>
                 <TableHead className={styles.tableHead}>
                     <TableRow>
-                        <TableCell>ID</TableCell>
-                        <TableCell># Order</TableCell>
-                        <TableCell>Date</TableCell>
-                        <TableCell># Products</TableCell>
-                        <TableCell>Final Price</TableCell>
-                        <TableCell>Options</TableCell>
+                        <TableCell className={styles.tableCell}>ID</TableCell>
+                        <TableCell className={styles.tableCell}># Order</TableCell>
+                        <TableCell className={styles.tableCell}>Date</TableCell>
+                        <TableCell className={styles.tableCell}># Products</TableCell>
+                        <TableCell className={styles.tableCell}>Final Price</TableCell>
+                        <TableCell className={styles.tableCell}>Options</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>

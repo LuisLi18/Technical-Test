@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Container, Typography, Grid, Box, Table, TableBody, TableCell, TableHead, TableRow, Button, Snackbar } from '@mui/material';
@@ -6,6 +6,9 @@ import OrderForm from './OrderForm';
 import ProductTable from './ProductTable';
 import ProductDialog from './ProductDialog';
 import ConfirmationDialog from './ConfimationDialog';
+import SaveIcon from '@mui/icons-material/Save';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import styles from '@/app/styles/add-edit-order.module.css'; 
 
 export default function AddEditOrder() {
     const URL = 'http://localhost:3000';
@@ -18,32 +21,20 @@ export default function AddEditOrder() {
         numProducts: 0,
         finalPrice: 0,
     });
-    // show the available products
     const [availableProducts, setAvailableProducts] = useState([]);
-
-    // list of product to add to the order
     const [productList, setProductList] = useState([]);
-
-    // open dialogs
     const [open, setOpen] = useState(false);
     const [openConfirmation, setOpenConfirmation] = useState(false);
-    // product that user wants to add in Product Dialog
     const [productToAdd, setproductToAdd] = useState(null);
-
-    // add or edit order in Product Dialog (it's only a tag)
     const [addOrEditOrder, setAddOrEditOrder] = useState([]);
-
-    // product to delete in Confirmation Dialog (is an id)
     const [deleteProduct, setDeleteProduct] = useState(null);
 
     useEffect(() => {
         const fetchOrder = async () => {
             if (id) {
                 try {
-                    // actualiza la información del pedido
                     const orderRes = await fetch(`${URL}/api/orders/${id}`);
                     const orderData = await orderRes.json();
-                    // Transformar la respuesta para ajustar el estado `newOrder`
                     const transformedOrder = {
                         orderNumber: orderData.orderNumber,
                         date: orderData.createdAt.split('T')[0],
@@ -53,7 +44,6 @@ export default function AddEditOrder() {
 
                     setNewOrder(transformedOrder);
 
-                    // actualiza la lista de productos del pedido
                     const res = await fetch(`${URL}/api/orders/${id}/products`);
                     const data = await res.json();
                     setProductList(data);
@@ -68,7 +58,6 @@ export default function AddEditOrder() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                // actualiza la lista de productos disponibles
                 const res = await fetch(`${URL}/api/products`);
                 const data = await res.json();
                 setAvailableProducts(data);
@@ -95,8 +84,6 @@ export default function AddEditOrder() {
     const handleSave = async () => {
         try {
             newOrder.products = productList;
-            // console.newOrder('new Order', newOrder);
-            // Save or Update the order
             const res = await fetch(`${URL}/api/orders${id ? `/${id}` : ''}`, {
                 method: id ? 'PUT' : 'POST',
                 headers: {
@@ -105,11 +92,7 @@ export default function AddEditOrder() {
                 body: JSON.stringify(newOrder)
             });
             const data = await res.json();
-            console.log('Saved order:', data);
-
-            // Update the stock of the products
             await Promise.all(availableProducts.map(async (product) => {
-                console.log("PRODUCT", product);
                 await fetch(`${URL}/api/products/${product.id}`, {
                     method: 'PUT',
                     headers: {
@@ -118,7 +101,6 @@ export default function AddEditOrder() {
                     body: JSON.stringify(product)
                 });
             }));
-            console.log('Updated products:', availableProducts);
             router.push('/my-orders');
         } catch (error) {
             console.error('Failed to save order', error);
@@ -138,13 +120,9 @@ export default function AddEditOrder() {
 
     const handleDeleteProduct = () => {
         handleClose();
-        // Aumentar el stock del producto eliminado
         const productToDelete = productList.find(p => p.id === deleteProduct);
         const product = availableProducts.find(p => p.id === deleteProduct);
-
         product.stock += productToDelete.qty;
-
-        // Eliminar el producto de la lista
         setProductList(prevList => prevList.filter(product => product.id !== deleteProduct));
     };
 
@@ -164,7 +142,6 @@ export default function AddEditOrder() {
 
     const handleProductDialogSave = (productName, quantity, actionToAddOrEdit) => {
         quantity = parseInt(quantity);
-        // Encontrar el producto en availableProducts
         const product = availableProducts.find(p => p.name === productName);
 
         if (!product) {
@@ -172,35 +149,27 @@ export default function AddEditOrder() {
             return;
         }
 
-        // Verificar si hay suficiente stock
         if (product.stock < quantity) {
             console.alert('Not enough stock available.');
             return;
         }
 
-        // Encontrar si el producto ya está en la lista de productos
         const existingProduct = productList.find(p => p.name === productName);
 
         if (existingProduct) {
-            // Si el producto ya existe, sumar la cantidad
             const newQty = existingProduct.qty + quantity;
-            
-            // Verificar si hay suficiente stock
+
             if (product.stock < newQty - existingProduct.qty) {
                 console.alert('Not enough stock available for additional quantity.');
                 return;
             }
-            // Condicional para editar la cantidad de productos
-            if (actionToAddOrEdit == 'add'){
+
+            if (actionToAddOrEdit === 'add') {
                 existingProduct.qty += quantity;
-            }
-            else{
-                console.log('Existing product:', existingProduct.qty)
-                console.log('Quantity:', quantity)
-                if (existingProduct.qty > quantity){
+            } else {
+                if (existingProduct.qty > quantity) {
                     product.stock += (existingProduct.qty - quantity);
-                }
-                else{
+                } else {
                     product.stock -= (quantity - existingProduct.qty);
                 }
                 existingProduct.qty = quantity;
@@ -208,7 +177,6 @@ export default function AddEditOrder() {
 
             existingProduct.totalPrice = existingProduct.unitPrice * existingProduct.qty;
         } else {
-            // Si el producto es nuevo, añadirlo a la lista
             productList.push({
                 id: product.id,
                 name: product.name,
@@ -218,16 +186,11 @@ export default function AddEditOrder() {
             });
         }
 
-        // Restar la cantidad del stock de availableProducts
-        // Considerar una condicional para restar o sumar el stock
-        if (actionToAddOrEdit == 'add') {
+        if (actionToAddOrEdit === 'add') {
             product.stock -= quantity;
         }
 
         updateOrder();
-        console.log('Product added to list:', productList);
-        console.log('Updated available products:', availableProducts);
-
         handleProductDialogClose();
     };
 
@@ -241,11 +204,11 @@ export default function AddEditOrder() {
     };
 
     return (
-        <Container>
-            <Typography variant="h4" gutterBottom>
+        <Container className={styles.container}>
+            <Typography variant="h4" className={styles.header}>
                 {id ? 'Edit Order' : 'Add Order'}
             </Typography>
-            <Grid container spacing={2}>
+            <Grid container spacing={3}>
                 <Grid item xs={12} md={4}>
                     <OrderForm
                         order={newOrder}
@@ -260,46 +223,45 @@ export default function AddEditOrder() {
                             products={productList}
                             handleEditProduct={handleEditProduct}
                             handleOpen={handleOpen}
-                        />) : <p>Try adding products in your order</p> 
+                        />) : <p className={styles.noProductsMessage}>Try adding products in your order</p> 
                     }
                 </Grid>
             </Grid>
-            <h1>Available Products</h1>
-            <Table>
-                <TableHead>
+            <Typography variant="h6" className={styles.availableProductsHeader}>
+                Available Products
+            </Typography>
+            <Table className={styles.table}>
+                <TableHead className={styles.tableHead}>
                     <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Unit Price</TableCell>
-                        <TableCell>Stock</TableCell>
-                        <TableCell>Stock Used</TableCell>
+                        <TableCell style={{fontWeight: 'bold'}}>Name</TableCell>
+                        <TableCell style={{fontWeight: 'bold'}}>Unit Price</TableCell>
+                        <TableCell style={{fontWeight: 'bold'}}>Stock</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {availableProducts && availableProducts.map((product) => {
-                            const usedStock = productList.find(p => p.id === product.id)?.qty || 0;
-                            return (
-                                <TableRow key={product.id}>
-                                    <TableCell>{product.name}</TableCell>
-                                    <TableCell>{formatCurrency(product.unitPrice)}</TableCell>
-                                    <TableCell>{product.stock}</TableCell>
-                                    <TableCell>
-                                        {usedStock > 0 ? (
-                                            <span style={{ color: 'red' }}>
-                                                {usedStock} <span style={{ fontSize: 'small' }}>↓</span>
-                                            </span>
-                                        ) : (
-                                            <span>{usedStock}</span>
-                                        )}
-                                    </TableCell>
-                                </TableRow>
-                            );
-                        })}
+                    {availableProducts.map((product) => {
+                        return (
+                            <TableRow key={product.id} className={styles.tableRow}>
+                                <TableCell>{product.name}</TableCell>
+                                <TableCell>{formatCurrency(product.unitPrice)}</TableCell>
+                                <TableCell>{product.stock}</TableCell>
+                            </TableRow>
+                        );
+                    })}
                 </TableBody>
             </Table>
 
-            <Button variant="contained" color="primary" onClick={handleSave} sx={{ marginTop: '16px' }}>
-                {id ? 'Save' : 'Add'} Order
-            </Button>
+            <Box display="flex" justifyContent="flex-end">
+                <Button 
+                    variant="contained" 
+                    color="primary" 
+                    onClick={handleSave} 
+                    className={styles.saveButton}
+                    startIcon={id ? <SaveIcon /> : <AddCircleIcon />}
+                >
+                    {id ? 'Save' : 'Add'} Order
+                </Button>
+            </Box>
 
             <ProductDialog
                 open={open}

@@ -1,8 +1,5 @@
 .container {
     padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header {
@@ -10,21 +7,29 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    
 }
 
 .table {
     background-color: #ffffff;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
 }
 
 .tableHead {
-    background-color: #e0e0e0;
+    background-color: #b1b1b1;
+    
+}
+.tableCell {
+    font-weight: 600;
 }
 
+.tableRow {
+    transition: background-color 0.3s ease; 
+}
 .tableRow:hover {
-    background-color: #f1f1f1;
+    background-color: #d8d8d8;
 }
 
 .actions {
@@ -34,32 +39,32 @@
 
 .addButton {
     margin-top: 16px;
-    background-color: #4CAF50; /* Green */
+    background-color: #4CAF50;
     color: white;
 }
 .addButton:hover {
-    background-color: #037007; /* Green */
+    background-color: #037007;
     color: white;
     font-weight: bold;
 }
 
 .editButton {
-    background-color: #2196F3; /* Blue */
+    background-color: #2196F3;
     color: white;
 }
 .editButton:hover {
-    background-color: #054d88; /* Blue */
+    background-color: #054d88; 
     color: white;
     font-weight: bold;
 }
 
 .deleteButton {
-    background-color: #f44336; /* Red */
+    background-color: #f44336;
     color: white;
 }
 
 .deleteButton:hover {
-    background-color: #940d03; /* Red */
+    background-color: #940d03;
     color: white;
     font-weight: bold;
 }
