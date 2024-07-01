@@ -1,0 +1,65 @@
+.container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.table {
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tableHead {
+    background-color: #e0e0e0;
+}
+
+.tableRow:hover {
+    background-color: #f1f1f1;
+}
+
+.actions {
+    display: flex;
+    gap: 16px;
+}
+
+.addButton {
+    margin-top: 16px;
+    background-color: #4CAF50; /* Green */
+    color: white;
+}
+.addButton:hover {
+    background-color: #037007; /* Green */
+    color: white;
+    font-weight: bold;
+}
+
+.editButton {
+    background-color: #2196F3; /* Blue */
+    color: white;
+}
+.editButton:hover {
+    background-color: #054d88; /* Blue */
+    color: white;
+    font-weight: bold;
+}
+
+.deleteButton {
+    background-color: #f44336; /* Red */
+    color: white;
+}
+
+.deleteButton:hover {
+    background-color: #940d03; /* Red */
+    color: white;
+    font-weight: bold;
+}

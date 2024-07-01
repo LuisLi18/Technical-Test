@@ -2,6 +2,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Container, Typography, Table, TableBody, TableCell, TableHead, TableRow, Button, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import styles from '@/app/styles/my-orders.module.css';
 
 export default function MyOrders() {
     const URL = 'http://localhost:3000/';
@@ -46,12 +50,19 @@ export default function MyOrders() {
     };
 
     return (
-        <Container>
-            <Typography variant="h4" gutterBottom>
-                My Orders
-            </Typography>
-            <Table>
-                <TableHead>
+        <Container className={styles.container}>
+            <div className={styles.header}>
+                <Typography variant="h4" gutterBottom>
+                    My Orders
+                </Typography>
+                <Link href="/add-order" passHref>
+                    <Button variant="contained" className={styles.addButton} startIcon={<AddIcon />}>
+                        Add New Order
+                    </Button>
+                </Link>
+            </div>
+            <Table className={styles.table}>
+                <TableHead className={styles.tableHead}>
                     <TableRow>
                         <TableCell>ID</TableCell>
                         <TableCell># Order</TableCell>
@@ -63,31 +74,28 @@ export default function MyOrders() {
                 </TableHead>
                 <TableBody>
                     {orders.map((order) => (
-                        <TableRow key={order.id}>
+                        <TableRow key={order.id} className={styles.tableRow}>
                             <TableCell>{order.id}</TableCell>
                             <TableCell>{order.orderNumber}</TableCell>
                             <TableCell>{new Date(order.createdAt).toISOString().split('T')[0]}</TableCell>
                             <TableCell>{order.numProducts}</TableCell>
                             <TableCell>{formatCurrency(order.finalPrice)}</TableCell>
                             <TableCell>
-                                <Link href={`/add-order/${order.id}`} passHref>
-                                    <Button variant="contained" color="primary" sx={{ marginRight: '8px' }}>
-                                        Edit Order
+                                <div className={styles.actions}>
+                                    <Link href={`/add-order/${order.id}`} passHref>
+                                        <Button variant="contained" className={styles.editButton} startIcon={<EditIcon />}>
+                                            Edit
+                                        </Button>
+                                    </Link>
+                                    <Button variant="contained" className={styles.deleteButton} startIcon={<DeleteIcon />} onClick={() => handleClickOpen(order)}>
+                                        Delete
                                     </Button>
-                                </Link>
-                                <Button variant="contained" color="secondary" onClick={() => handleClickOpen(order)}>
-                                    Delete Order
-                                </Button>
+                                </div>
                             </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
-            <Link href="/add-order" passHref>
-                <Button variant="contained" color="primary" sx={{ marginTop: '16px' }}>
-                    Add New Order
-                </Button>
-            </Link>
 
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Confirm Delete</DialogTitle>
