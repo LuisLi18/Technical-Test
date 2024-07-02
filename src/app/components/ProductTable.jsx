@@ -13,11 +13,11 @@ export default function ProductTable({ products, handleEditProduct, handleOpen }
             <Table className={styles.table}>
                 <TableHead className={styles.tableHead}>
                     <TableRow className={styles.tableHeadRow}>
-                        <TableCell className={`${styles.tableCell} ${styles.tableHeadCell}`}>Name</TableCell>
-                        <TableCell className={`${styles.tableCell} ${styles.tableHeadCell}`}>Unit Price</TableCell>
-                        <TableCell className={`${styles.tableCell} ${styles.tableHeadCell}`}>Quantity</TableCell>
-                        <TableCell className={`${styles.tableCell} ${styles.tableHeadCell}`}>Total Price</TableCell>
-                        <TableCell className={`${styles.tableCell} ${styles.tableHeadCell}`}>Options</TableCell>
+                        <TableCell className={`${styles.tableCell} ${styles.tableHeadCell}`}style={{fontWeight: 'bold', color: 'white'}}>Name</TableCell>
+                        <TableCell className={`${styles.tableCell} ${styles.tableHeadCell}`}style={{fontWeight: 'bold', color: 'white'}}>Unit Price</TableCell>
+                        <TableCell className={`${styles.tableCell} ${styles.tableHeadCell}`}style={{fontWeight: 'bold', color: 'white'}}>Quantity</TableCell>
+                        <TableCell className={`${styles.tableCell} ${styles.tableHeadCell}`}style={{fontWeight: 'bold', color: 'white'}}>Total Price</TableCell>
+                        <TableCell className={`${styles.tableCell} ${styles.tableHeadCell}`}style={{fontWeight: 'bold', color: 'white'}}>Options</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
