@@ -1,33 +1,29 @@
 /* OrderForm.module.css */
 .formContainer {
-    background-color: #333;
+    background-color: #f5f5f5;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    color: #fff;
+    color: #000000;
 }
 
 .textField {
     margin-bottom: 16px;
-    background-color: #444;
+    background-color: #f5f5f5;
     border-radius: 4px;
 }
 
 .textField input {
-    color: #fff;
+    color: #686767;
 }
 
 .textField label {
-    color: #ccc !important;
+    color: #B1B1B1 !important;
 }
 
 .textFieldDisabled {
-    background-color: #555 !important;
-    color: white;
-}
-
-.textFieldDisabled input {
-    color: white;
+    background-color: #f5f5f5;
+    color: #000000;
 }
 
 .addButton {

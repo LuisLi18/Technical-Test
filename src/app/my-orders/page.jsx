@@ -35,9 +35,27 @@ export default function MyOrders() {
 
     const handleDelete = async () => {
         try {
+            const res = await fetch(`${URL}/api/orders/${orderToDelete.id}`);
+            const orderDetails = await res.json();
+    
+            await Promise.all(orderDetails.details.map(async (detail) => {
+                const productRes = await fetch(`${URL}/api/products/${detail.productId}`);
+                const productData = await productRes.json();
+                productData.stock += detail.quantity;
+    
+                await fetch(`${URL}/api/products/${detail.productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+            }));
+    
             await fetch(`${URL}/api/orders/${orderToDelete.id}`, {
                 method: 'DELETE',
             });
+            
             setOrders(orders.filter(order => order.id !== orderToDelete.id));
             handleClose();
         } catch (error) {

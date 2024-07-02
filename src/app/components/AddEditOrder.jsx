@@ -47,6 +47,7 @@ export default function AddEditOrder() {
                     const res = await fetch(`${URL}/api/orders/${id}/products`);
                     const data = await res.json();
                     setProductList(data);
+                    setEditProductList(data);
                 } catch (error) {
                     console.error('Failed to fetch order', error);
                 }
@@ -120,12 +121,37 @@ export default function AddEditOrder() {
 
     const handleDeleteProduct = () => {
         handleClose();
+    
+        // Encontrar el producto a eliminar en la lista de productos del pedido
         const productToDelete = productList.find(p => p.id === deleteProduct);
+    
+        // Si no se encuentra el producto, salir de la función
+        if (!productToDelete) {
+            return;
+        }
+    
+        // Encontrar el producto en la lista de productos disponibles y actualizar su stock
         const product = availableProducts.find(p => p.id === deleteProduct);
-        product.stock += productToDelete.qty;
-        setProductList(prevList => prevList.filter(product => product.id !== deleteProduct));
+        if (product) {
+            product.stock += productToDelete.qty;
+        }
+    
+        // Actualizar la lista de productos del pedido
+        const updatedProductList = productList.filter(product => product.id !== deleteProduct);
+    
+        // Calcular el nuevo número de productos y el precio final
+        const updatedNumProducts = updatedProductList.length;
+        const updatedFinalPrice = updatedProductList.reduce((total, product) => total + product.totalPrice, 0);
+    
+        // Actualizar el estado
+        setProductList(updatedProductList);
+        setNewOrder({ 
+            ...newOrder, 
+            numProducts: updatedNumProducts,
+            finalPrice: updatedFinalPrice
+        });
     };
-
+    
     const handleClose = () => {
         setOpenConfirmation(false);
     };
@@ -143,40 +169,40 @@ export default function AddEditOrder() {
     const handleProductDialogSave = (productName, quantity, actionToAddOrEdit) => {
         quantity = parseInt(quantity);
         const product = availableProducts.find(p => p.name === productName);
-
+    
         if (!product) {
-            console.alert('Product not found in available products.');
+            alert('Product not found in available products.');
             return;
         }
-
-        if (product.stock < quantity) {
-            console.alert('Not enough stock available.');
-            return;
-        }
-
+    
         const existingProduct = productList.find(p => p.name === productName);
-
+    
         if (existingProduct) {
-            const newQty = existingProduct.qty + quantity;
-
-            if (product.stock < newQty - existingProduct.qty) {
-                console.alert('Not enough stock available for additional quantity.');
-                return;
-            }
-
+            let newQty;
             if (actionToAddOrEdit === 'add') {
-                existingProduct.qty += quantity;
-            } else {
-                if (existingProduct.qty > quantity) {
-                    product.stock += (existingProduct.qty - quantity);
-                } else {
-                    product.stock -= (quantity - existingProduct.qty);
+                newQty = existingProduct.qty + quantity;
+                if (product.stock < quantity) {
+                    alert('Not enough stock available.');
+                    return;
                 }
+                existingProduct.qty += quantity;
+                product.stock -= quantity;
+            } else {
+                newQty = quantity;
+                if (product.stock + existingProduct.qty < quantity) {
+                    alert('Not enough stock available.');
+                    return;
+                }
+                product.stock += (existingProduct.qty - quantity);
                 existingProduct.qty = quantity;
             }
-
+    
             existingProduct.totalPrice = existingProduct.unitPrice * existingProduct.qty;
         } else {
+            if (product.stock < quantity) {
+                alert('Not enough stock available.');
+                return;
+            }
             productList.push({
                 id: product.id,
                 name: product.name,
@@ -184,15 +210,13 @@ export default function AddEditOrder() {
                 qty: quantity,
                 totalPrice: product.unitPrice * quantity
             });
-        }
-
-        if (actionToAddOrEdit === 'add') {
             product.stock -= quantity;
         }
-
+    
         updateOrder();
         handleProductDialogClose();
     };
+    
 
     const handleProductToAddChange = (e) => {
         const { name, value } = e.target;
@@ -233,13 +257,13 @@ export default function AddEditOrder() {
             <Table className={styles.table}>
                 <TableHead className={styles.tableHead}>
                     <TableRow>
-                        <TableCell style={{fontWeight: 'bold'}}>Name</TableCell>
-                        <TableCell style={{fontWeight: 'bold'}}>Unit Price</TableCell>
-                        <TableCell style={{fontWeight: 'bold'}}>Stock</TableCell>
+                        <TableCell style={{fontWeight: 'bold', color: 'white'}}>Name</TableCell>
+                        <TableCell style={{fontWeight: 'bold', color: 'white'}}>Unit Price</TableCell>
+                        <TableCell style={{fontWeight: 'bold', color: 'white'}}>Stock</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {availableProducts.map((product) => {
+                    {availableProducts && availableProducts.map((product) => {
                         return (
                             <TableRow key={product.id} className={styles.tableRow}>
                                 <TableCell>{product.name}</TableCell>

@@ -20,7 +20,7 @@ export async function PUT(request, { params }) {
         await connection.query('DELETE FROM technical.orderdetail WHERE orderId = ?', [orderId]);
 
         for (const product of products) {
-            await connection.query('INSERT INTO technical.orderdetail (orderId, productId, quantity, totalPrice) VALUES (?, ?, ?, ?)', [orderId, product.id, product.quantity, product.totalPrice]);
+            await connection.query('INSERT INTO technical.orderdetail (orderId, productId, quantity, totalPrice) VALUES (?, ?, ?, ?)', [orderId, product.id, product.qty, product.totalPrice]);
         }
 
         return NextResponse.json({ orderId, orderNumber, numProducts, finalPrice });
@@ -29,13 +29,39 @@ export async function PUT(request, { params }) {
     }
 }
 
+// export async function DELETE(request, { params }) {
+//     const orderId = params.id;
+//     try {
+//         await connection.query('DELETE FROM technical.order WHERE id = ?', [orderId]);
+//         return NextResponse.json({ id: orderId });
+//     } catch (error) {
+//         return NextResponse.json({ error: 'Failed to delete order' });
+//     }
+// }
 export async function DELETE(request, { params }) {
     const orderId = params.id;
     try {
+        // Retrieve order details
+        // const orderDetails = await connection.query('SELECT * FROM technical.orderdetail WHERE orderId = ?', [orderId]);
+        
+        // Update product stock based on order details
+        // await Promise.all(orderDetails.map(async (detail) => {
+        //     const product = await connection.query('SELECT * FROM technical.product WHERE id = ?', [detail.productId]);
+        //     const newStock = product[0].stock + detail.quantity;
+
+        //     await connection.query('UPDATE technical.product SET stock = ? WHERE id = ?', [newStock, detail.productId]);
+        // }));
+
+        // Delete order details
+        await connection.query('DELETE FROM technical.orderdetail WHERE orderId = ?', [orderId]);
+
+        // Delete the order
         await connection.query('DELETE FROM technical.order WHERE id = ?', [orderId]);
+
         return NextResponse.json({ id: orderId });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to delete order' });
     }
 }
+
 
